@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 from datetime import timedelta
@@ -13,7 +14,7 @@ class TranscriptionPDF(FPDF):
         self.cell(
             0,
             10,
-            "Transcripción de Audio",
+            "Transcription",
             border=0,
             new_x="LMARGIN",
             new_y="NEXT",
@@ -47,33 +48,64 @@ def create_pdf(segments, output_path):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Use: python main.py <audio_file> [output_directory]")
-        sys.exit(1)
 
-    audio_path = sys.argv[1]
-    target_folder = sys.argv[2] if len(sys.argv) > 2 else "outputs"
+    parser = argparse.ArgumentParser(
+        description="Whisper to PDF CLI Tool",
+        epilog="Example: python main.py -m large -l es interview.mp3 -o ./outputs",
+    )
 
-    if not os.path.exists(audio_path):
-        print(f"Error: The file '{audio_path}' doesn't exist")
-        sys.exit(1)
+    parser.add_argument(
+        "-m",
+        "--model",
+        default="base",
+        choices=["tiny", "base", "small", "medium", "large"],
+        help="Whisper AI model size. Larger models are more accurate but slower (default: 'base')",
+    )
 
-    output_dir = Path(target_folder)
+    parser.add_argument(
+        "-l",
+        "--language",
+        default="es",
+        help="Language code for transcription (e.g., 'en', 'es', 'fr'). Default: 'es'",
+    )
+
+    parser.add_argument(
+        "input", help="Path to the input audio file (e.g., audio.mp3, recording.wav)"
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="outputs",
+        help="Directory where the PDF will be saved (default: 'outputs')",
+    )
+
+    args = parser.parse_args()
+
+    if not os.path.exists(args.input):
+        print(f"Error:The file '{args.input}' does not exist")
+        return
+
+    audio_path = Path(args.input)
+    output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
+    pdf_output = output_dir / f"{audio_path.stem}.pdf"
 
-    file_name = Path(target_folder)
-    pdf_output = output_dir / f"{file_name}.pdf"
+    print(f"[*] Loading model '{args.model}'...")
 
-    print(f"Loading Whisper Model...")
-    model = whisper.load_model("base")
+    try:
+        model = whisper.load_model(args.model)
+    except Exception as e:
+        print(f"[!] Critical Error: {e}")
+        return
 
-    print(f"Processing: {audio_path}")
-    print(f"Destiny: {output_dir}/")
+    print(f"[*] Transcribing... (this might take a moment)")
+    result = model.transcribe(str(audio_path), language=args.language)
 
-    result = model.transcribe(audio_path, language="es")
-
+    print(f"[*] Exporting to PDF...")
     create_pdf(result["segments"], pdf_output)
-    print(f"Ready!, PDF on: {pdf_output}")
+
+    print(f"\n[+] Success! File saved at: {pdf_output}")
 
 
 if __name__ == "__main__":
