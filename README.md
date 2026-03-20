@@ -54,15 +54,6 @@ options:
 Example: python main.py -m large -l es interview.mp3 -o ./outputs
 ```
 
-### Examples:
-* **Default (Saves to `./outputs/`):**
-  ```bash
-  python main.py my_lecture.mp3
-  ```
-* **Custom Folder:**
-  ```bash
-  python main.py interview.wav ./docs/transcriptions
-  ```
 
 ## Key Features
 - **100% Local Transcription:** Powered by OpenAI Whisper. No data is sent to the cloud, ensuring total privacy.
