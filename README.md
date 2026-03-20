@@ -33,10 +33,25 @@ sudo pacman -S ffmpeg python-pip
 
 ## Usage
 
-The script accepts the audio file path as the first argument and an optional output directory as the second.
+The script accepts the audio file path an optional output directory as the second.
 
 ```bash
-python main.py <audio_path> [output_directory]
+usage: main.py [-h] [-m {tiny,base,small,medium,large}] [-l LANGUAGE] [-o OUTPUT] input
+
+Whisper to PDF CLI Tool
+
+positional arguments:
+  input                 Path to the input audio file (e.g., audio.mp3, recording.wav)
+
+options:
+  -h, --help            show this help message and exit
+  -m, --model {tiny,base,small,medium,large}
+                        Whisper AI model size. Larger models are more accurate but slower (default: 'base')
+  -l, --language LANGUAGE
+                        Language code for transcription (e.g., 'en', 'es', 'fr'). Default: 'es'
+  -o, --output OUTPUT   Directory where the PDF will be saved (default: 'outputs')
+
+Example: python main.py -m large -l es interview.mp3 -o ./outputs
 ```
 
 ### Examples:
